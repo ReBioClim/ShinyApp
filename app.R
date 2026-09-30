@@ -12,8 +12,8 @@ score_levels <- c("very low","low","medium","high","very high"); score_lookup <-
 microclimate_raw <- c("Bila Nisa"=3.6,"Geberbach"=3.8,"Piasnica"=3.5,"Teplica"=3.8)
 streams_raw <- c("BilaNisa","Geberbach","Piasnica","Teplica")
 streams_lab <- c(BilaNisa="Bila Nisa",Geberbach="Geberbach",Piasnica="Piasnica",Teplica="Teplica")
-quadrant_colors <- c("Actual conflict"="#cc415e","Actual synergy"="#2f41dd","Potential conflict"="#e9ce2c","Potential synergy"="#66d7d1")
-class_colors <- setNames(colorRampPalette(c("#66d7d1","#2f41dd"))(5),score_levels)
+quadrant_colors <- c("Actual conflict"="#aa9de1","Actual synergy"="#86b9dc","Potential conflict"="#d8ebcb","Potential synergy"="#9fc68a")
+class_colors <- setNames(colorRampPalette(c("#d8eaf5","#4b83ad"))(5),score_levels)
 map_category_levels <- list(Continuouness.for.fish...mzb=c("no","limited","yes"),Special.bed.structures.Bonus=c("none","few / slight","many"),Passability=c("not possible","hardly","medium","well","very well"),Accessibility=c("not possible","hardly","medium","well","very well"))
 stream_shapes <- c("Bila Nisa"=21,Geberbach=22,Piasnica=23,Teplica=24,Case=21)
 quadrant_labels <- c("Actual synergy"="Recognized Asset","Potential synergy"="High Restoration Opportunity","Potential conflict"="Perception Gap","Actual conflict"="Information/ Restoration Gap")
@@ -63,7 +63,7 @@ plot_quadrants <- function(x, lab="abbr") {
     geom_point(aes(color=class), alpha=0, show.legend=TRUE) +
     geom_text_repel(aes(label=.data[[lab]]), position=jittered, color="black", size=2.7,
       max.overlaps=Inf, seed=42, box.padding=.22, point.padding=.12, min.segment.length=0,
-      segment.color="#66d7d1", show.legend=FALSE) +
+      segment.color="#aa9de1", show.legend=FALSE) +
     scale_x_continuous("Spatial condition", breaks=1:5, limits=c(.5,5.5)) + scale_y_continuous("Public support", breaks=1:5, limits=c(.5,5.5)) +
     scale_fill_manual(values=quadrant_colors, limits=names(quadrant_colors), drop=FALSE, guide="none") +
     scale_color_manual("Category", values=quadrant_colors, limits=names(quadrant_colors), drop=FALSE) +
@@ -72,6 +72,33 @@ plot_quadrants <- function(x, lab="abbr") {
     coord_cartesian(clip="off") + theme_minimal(base_size=14) + theme(text=element_text(color="black"), axis.text=element_text(color="black"), panel.grid.major=element_line(color="#eeeeee",linewidth=.3), panel.grid.minor=element_blank(), legend.position="bottom", legend.text=element_text(size=9), legend.title=element_text(size=9), legend.key.size=grid::unit(.35,"cm"), legend.spacing.x=grid::unit(.1,"cm"), plot.background=element_rect(fill="#ffffff", color=NA), plot.margin=margin(20,95,20,95))
   if(nrow(x)>20 && length(unique(x$pilot_stream))>1) p <- p + facet_wrap(~pilot_stream,ncol=2)
   p
+}
+
+plotly_quadrants <- function(x) {
+  x <- as.data.frame(x)
+  if(!all(c("plot_x","plot_y") %in% names(x))) {
+    x <- x |> mutate(.row=row_number(), plot_x=sc+((((.row*7) %% 17)-8)*.006), plot_y=ps+((((.row*11) %% 17)-8)*.006))
+  }
+  labels <- list(
+    list(x=1.15,y=3.6,text="High Restoration<br>Opportunity",showarrow=FALSE,xanchor="left",font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111")),
+    list(x=3.75,y=3.6,text="Recognized Asset",showarrow=FALSE,xanchor="left",font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111")),
+    list(x=1.15,y=1.5,text="Information /<br>Restoration Gap",showarrow=FALSE,xanchor="left",font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111")),
+    list(x=3.75,y=1.5,text="Perception Gap",showarrow=FALSE,xanchor="left",font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111")))
+  p <- plot_ly()
+  for(category in names(quadrant_colors)) {
+    z <- x[x$class==category,,drop=FALSE]
+    marker <- list(size=14,color=unname(quadrant_colors[category]),line=list(color="#000000",width=1))
+    if(nrow(z)) {
+      measure <- if("measure" %in% names(z)) z$measure else unname(measure_names[z$abbr])
+      tooltip <- paste0("<b>",htmltools::htmlEscape(measure),"</b><br>Spatial condition: ",z$sc," | Public support: ",z$ps)
+      p <- add_trace(p,x=z$plot_x,y=z$plot_y,text=tooltip,type="scatter",mode="markers",name=category,hoverinfo="text",marker=marker,showlegend=TRUE)
+    } else p <- add_trace(p,x=0,y=0,type="scatter",mode="markers",name=category,hoverinfo="skip",marker=marker,showlegend=TRUE)
+  }
+  p <- layout(p,xaxis=list(title="Spatial condition",range=c(.5,5.5),tickvals=1:5,zeroline=FALSE,fixedrange=TRUE),
+    yaxis=list(title="Public support",range=c(.5,5.5),tickvals=1:5,zeroline=FALSE,fixedrange=TRUE),dragmode=FALSE,
+    shapes=list(list(type="line",x0=3.5,x1=3.5,y0=.5,y1=5.5,line=list(color="#999999",dash="dash")),list(type="line",x0=.5,x1=5.5,y0=2.5,y1=2.5,line=list(color="#999999",dash="dash"))),
+    annotations=labels,font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111"),legend=list(orientation="h",x=0,y=-.18,font=list(size=10),itemwidth=30),margin=list(b=100),plot_bgcolor="#ffffff",paper_bgcolor="#ffffff")
+  config(p,displayModeBar=FALSE,scrollZoom=FALSE,doubleClick=FALSE)
 }
 
 report_abbr <- function(x) {
@@ -181,23 +208,23 @@ spatial_input_reference <- tibble::tribble(
   mutate(spatial_indicator=variable_name,.after=measure)
 public_input_reference <- tibble::tribble(
   ~measure, ~variable_name, ~unit, ~definition,
-  "Access_Stream", "Access to water - stairs and pier (a)", "Choice-experiment coefficient", "Access to water - stairs and pier (a)",
-  "Integrate_Programmes", "Education, inspiration, casual contacts and recreational opportunities (c)", "1–4", "Education, inspiration, casual contacts and recreational opportunities (c)",
-  "Nature_Observation", "Observing nature (d)", "0–3", "Observing nature (d)",
-  "Instream_Structures", "Isles, water terraces, stones, dead wood in the stream (b)", "1–10", "Isles, water terraces, stones, dead wood in the stream (b)",
-  "Remove_Concrete_Channel", "Concrete stream (b) (*2)", "1–10", "Concrete stream (b) (*2)",
-  "Service_Buffer", "Arrangement of greenery in the wider area and riparian vegetation (a)", "Choice-experiment coefficient", "Arrangement of greenery in the wider area and riparian vegetation (a)",
-  "Groynes_Baffles_DeadWood", "Dead wood (b)", "1–10", "Dead wood (b)",
-  "Unseal_Surfaces", "Urban park (a) as proxy for impervious surface (*2)", "Choice-experiment coefficient", "Urban park (a) as proxy for impervious surface (*2)",
-  "Remove_TechRiverbed", "Meanders with/-out elements (a)", "Choice-experiment coefficient", "Meanders with/-out elements (a)",
-  "Green_Corridor", "Habitats for plants and animals (c)", "1–4", "Habitats for plants and animals (c)",
-  "Increase_Space", "Meanders with elements (a)", "Choice-experiment coefficient", "Meanders with elements (a)",
-  "Remove_BiologicalBarriers", "Fish passage (b)", "1–10", "Fish passage (b)",
-  "Green_Network", "Wide riparian vegetation and natural arrangement of greenery in the wider area (a)", "Choice-experiment coefficient", "Wide riparian vegetation and natural arrangement of greenery in the wider area (a)",
-  "Accessibility_Along_Stream", "Get from \"A to B\" (d)", "0–3", "Get from \"A to B\" (d)",
-  "Reconnect_Floodplains", "Pools and wetlands in floodplains (b)", "1–10", "Pools and wetlands in floodplains (b)",
-  "Riparian_Trees", "Improvement of microclimate (c) (as proxy for the added value of tree)", "1–4", "Improvement of microclimate (c) (as proxy for the added value of tree)",
-  "Riparian_Buffer", "Wide riparian vegetation (b)", "1–10", "Wide riparian vegetation (b)") |>
+  "Access_Stream", "Access to water - stairs and pier (a)", "Choice-experiment coefficient (0–1)", "Mean preference for access features such as stairs and a pier.",
+  "Integrate_Programmes", "Education, inspiration, casual contacts and recreational opportunities (c)", "1–4", "Importance of social, recreational and educational benefits of the restored site.",
+  "Nature_Observation", "Observing nature (d)", "0–3", "Agreement that the site is used mainly for observing nature.",
+  "Instream_Structures", "Isles, water terraces, stones, dead wood in the stream (b)", "1–10", "Average preference for islands, terraces, stones and dead wood in the stream.",
+  "Remove_Concrete_Channel", "Concrete stream (b) (*2)", "1–10", "Average preference for a straightened, concrete-lined stream design (inverted).",
+  "Service_Buffer", "Arrangement of greenery in the wider area and riparian vegetation (a)", "Choice-experiment coefficient (0–1)", "Mean preference for how greenery is arranged both near and further from the stream.",
+  "Groynes_Baffles_DeadWood", "Dead wood (b)", "1–10", "Average preference for streams that include dead wood.",
+  "Unseal_Surfaces", "Urban park (a) as proxy for impervious surface (*2)", "Choice-experiment coefficient (0–1)", "Mean preference for urban park near the site (as proxy for impervious surface; inverted).",
+  "Remove_TechRiverbed", "Meanders with/-out elements (a)", "Choice-experiment coefficient (0–1)", "Mean preference for stream meanders.",
+  "Green_Corridor", "Habitats for plants and animals (c)", "1–4", "Importance of the site supporting wildlife and plant life (as proxy for natural design).",
+  "Increase_Space", "Meanders with elements (a)", "Choice-experiment coefficient (0–1)", "Mean preference for stream meanders with elements.",
+  "Remove_BiologicalBarriers", "Fish passage (b)", "1–10", "Average preference for stream designs that allow fish to pass through.",
+  "Green_Network", "Wide riparian vegetation and natural arrangement of greenery in the wider area (a)", "Choice-experiment coefficient (0–1)", "Mean preference for wide riverside vegetation combined with a natural park further from the stream.",
+  "Accessibility_Along_Stream", "Get from \"A to B\" (d)", "0–3", "Agreement that the site is used mainly for passing through.",
+  "Reconnect_Floodplains", "Pools and wetlands in floodplains (b)", "1–10", "Average preference for pools and wetlands in the floodplain.",
+  "Riparian_Trees", "Improvement of microclimate (c) (as proxy for the added value of tree)", "1–4", "Importance of a cooler, more pleasant local climate as a benefit of restoration (as proxy for the added value of trees).",
+  "Riparian_Buffer", "Wide riparian vegetation (b)", "1–10", "Average preference for streams with a wide strip of riverside vegetation.") |>
   arrange(match(measure,measure_choices$abbr)) |>
   mutate(public_support_indicator=variable_name,.after=measure)
 normalize_case_measure <- function(x) {
@@ -215,6 +242,7 @@ score_spatial_raw <- function(measure, value) {
 score_public_raw <- function(value, scale) {
   if(!is.finite(value)) return(NA_integer_)
   x <- switch(scale,
+    coefficient_0_1=1+4*value,
     benefit_1_4=1+4*(value-1)/3,
     rating_1_10=1+4*(value-1)/9,
     use_0_3=1+4*value/3,
@@ -223,25 +251,29 @@ score_public_raw <- function(value, scale) {
   as.integer(pmax(1,pmin(5,round(x))))
 }
 valid_public_value <- function(value,scale) {
-  bounds <- list(benefit_1_4=c(1,4),rating_1_10=c(1,10),use_0_3=c(0,3),prepared_1_5=c(1,5))[[scale]]
+  bounds <- list(coefficient_0_1=c(0,1),benefit_1_4=c(1,4),rating_1_10=c(1,10),use_0_3=c(0,3),prepared_1_5=c(1,5))[[scale]]
   !is.null(bounds) && is.finite(value) && value>=bounds[1] && value<=bounds[2] && (scale!="prepared_1_5" || value %in% 1:5)
+}
+public_scale_for_measure <- function(measure) {
+  unit <- unname(setNames(public_input_reference$unit, public_input_reference$measure)[normalize_case_measure(measure)])
+  ifelse(grepl("Choice-experiment", unit, fixed=TRUE), "coefficient_0_1",
+    ifelse(unit=="1–4", "benefit_1_4", ifelse(unit=="1–10", "rating_1_10", ifelse(unit=="0–3", "use_0_3", NA_character_))))
 }
 units <- c(bench_count_50m="count", canopy_cover_10m="proportion (0–1)", impervious_cover_50m="%", poi_total_50m="count", slowmobility_length_m_50m="m", building_distance_mean_m="m")
 intro <- function(title, text) div(class="step-note", h3(title), tags$p(text))
 help_box <- div(class="step-note", h3("Help"),
-  tags$p("Responses to questions raised by city partners."),
   h5("Who is the tool for, and how does it relate to other project outputs?"), tags$p("City planners and restoration teams can compare restoration needs with public preferences and use the results in restoration planning and stakeholder discussions. The Toolkit describes the measures; spatial mapping and citizen surveys provide the evidence; SynCon brings these perspectives together. Links to other consortium tools have not yet been added."),
   h5("Where are the analytical steps and measure descriptions?"), tags$p("ReBioClim Example presents the pilot workflow. Steps 1–4 follow the same sequence: restoration measures, spatial data, public support and results. Step 1 lists the 17 measures and their indicators; click a row to open its Toolkit card. Steps 2 and 3 place variable definitions and original units beside the downloadable tables."),
   h5("How do I enter a new city or study area?"), tags$p("Download the two tables in Steps 2 and 3. Use one row for each study area and restoration measure, with matching case and measure names in both files. Follow each page's input-scale instructions, upload both files in Step 4 and click Calculate SynCon. Alternatively, paste standardized spatial-condition and public-support scores from 1 to 5. The case identifies your study area; the measure identifies the restoration action being assessed."),
   h5("Who prepares the spatial and survey data?"), tags$p("The city team defines the study area and restoration question. Geodata and ecological specialists prepare spatial analysis and structural mapping; survey specialists prepare the public-preference evidence. These tasks can be commissioned externally. Complete the preparation before uploading the case-level values."),
   h5("What do the five levels and map colors mean?"), tags$p("The final scale runs from very low (1) to very high (5). Spatial condition describes the relevant existing condition or availability; public support describes preference for the measure. Numeric spatial classes use the pooled pilot-section distribution, while structural indicators begin with field-assessment categories. Map colors become darker as values increase. ReBioClim Example shows section-level canopy values alongside the pilot mean and final score."),
   h5("How are public-support variables selected and weighted?"), tags$p("Each measure is linked to the relevant survey preference, benefit or site-use variable listed in Step 3. Where several variables represent one measure, the pilot method uses their average. The source evidence comprises choice-experiment preferences, feature ratings (1–10), benefit importance (1–4) and site use (0–3). Cross-variable interaction terms and additional weighting are not specified in the documented SynCon aggregation."),
-  h5("Why use synergy and conflict, and why are the boundaries at 3.5 and 2.5?"), tags$p("The categories retain the pilot terminology. Spatial scores 4–5 fall on the right and 1–3 on the left; public-support scores 3–5 fall above and 1–2 below. The lines at 3.5 and 2.5 separate these integer groups. Partners suggested using the term consensus and a zero-centered scale. These suggestions have not yet been adopted in this app. The classification table explains the restoration meaning of all four categories."),
+  h5("Why use synergy and conflict, and why are the boundaries at 3.5 and 2.5?"), tags$p("Spatial-condition scores 4–5 and public-support scores 3–5 are treated as high. The remaining scores are treated as low. The four combinations form the SynCon categories shown in the classification table."),
   h5("How can I inspect the results and use the map?"), tags$p("In ReBioClim Example, select a pilot stream and categories, then hover over a point for the measure name and scores. The plot and classification table use matching category colors. After reviewing the quadrant, use the map below to locate sections relevant to improving spatial conditions."),
-  h5("Can the tool be used in German and on a desktop?"), tags$p("The layout is designed for desktop use. The current interface is in English. A German version is not yet available."))
+  h5("Can the tool be used in other languages and on a phone?"), tags$p("The current version is in English and is designed for desktop or laptop use. Other language versions can be added once the content and terminology are agreed."))
 
 workflow_ui <- function() page_navbar(title="ReBioClim Synergies and Conflicts", fillable=FALSE,
-  theme=bs_theme(version=5, bootswatch="flatly", primary="#2f41dd", bg="#ffffff", fg="#000000"), header=includeCSS("app.css"),
+  theme=bs_theme(version=5, primary="#aa9de1", bg="#eef6e8", fg="#111111"), header=includeCSS("app.css"),
   nav_panel("About", div(class="step-note", h3("ReBioClim: Restoring urban streams to promote Biodiversity, Climate adaptation and to improve quality of life in cities"),tags$p(
     "ReBioClim is an Interreg Central Europe project that develops nature-based approaches to urban stream restoration to promote biodiversity, climate adaptation and quality of life. Researchers, cities and practitioners work with stakeholders in Dresden, Jablonec nad Nisou, Poznań and Senica to develop restoration strategies and action plans."),
     tags$a(href="https://www.interreg-central.eu/projects/rebioclim/",target="_blank",rel="noopener","Explore the ReBioClim project and its outputs")),
@@ -259,7 +291,8 @@ workflow_ui <- function() page_navbar(title="ReBioClim Synergies and Conflicts",
         tags$li(tags$strong("Spatial Data"), tags$p("Prepare values for the study area's 50 m stream sections.")),
         tags$li(tags$strong("Public Support"), tags$p("Collect survey evidence on the original questionnaire scale.")),
         tags$li(tags$strong("SynCon Results"), tags$p("Compare spatial condition and public support in the four quadrants."))),
-      tags$p("ReBioClim Example shows the data and results for the pilot streams. Follow Steps 1–4 to enter data for your own case."))),
+      tags$p("ReBioClim Example shows the data and results for the pilot streams. Follow Steps 1–4 to enter data for your own case.")),
+    tags$div(class="home-logo",tags$img(src="ReBioClim_logo.png",alt="Interreg Central Europe, co-funded by the European Union, ReBioClim"))),
   nav_panel("ReBioClim Example",intro("Introduction", "This page shows the analysis for four ReBioClim pilot streams. It starts with 17 restoration measures, uses spatial data from 50 m stream sections and public survey evidence, converts them into spatial-condition and public-support scores from 1 to 5, then classifies each measure in one of four SynCon quadrants. The four sections below follow the same steps as Steps 1–4 for your own case."),
     div(class="cardx",h5("1 Restoration Measures"),tags$p("The pilot analysis included all 17 restoration measures from the Toolkit. Each measure was linked to a spatial indicator and public-support evidence. The next page lists all 17 measures and opens their Toolkit cards.")),
     div(class="cardx",h5("2 Spatial Data"),tags$p("The pilot streams were divided into 50 m sections. Spatial indicators were calculated for each section and summarized at pilot-stream level. For riparian trees, the example below starts with section-level canopy cover and shows the pilot mean and spatial-condition score."),
@@ -282,6 +315,9 @@ workflow_ui <- function() page_navbar(title="ReBioClim Synergies and Conflicts",
       tags$p("Canopy-cover example: section values 0.20, 0.30 and 0.40 give a stream mean of (0.20 + 0.30 + 0.40) / 3 = 0.30. In the downloaded table, enter the stream name under case, Riparian_Trees under measure and 0.30 under raw_spatial_value. These three sections become one row, not three rows."),
       tags$p("For canopy cover, points of interest, bench count and impervious cover, enter the stream mean in the original input units. For the other measures, prepare the stream-level spatial-condition score first and enter that 1–5 score. Follow the variable definition for the aggregation: for example, the technical-riverbed variable is the percentage of sections with constructed beds. Repeat for each measure and each stream.")),
     div(class="cardx",downloadButton("download_spatial_template","Download spatial-data table")),
+    div(class="cardx",h5("Spatial GeoPackage"),
+      tags$p("Optional: upload a GeoPackage with 50 m stream sections to visualize the section values after calculating SynCon. Use line geometry and include section_id, stream_name (or case), and one or more spatial-indicator columns. The stream_name or case values must match the case names in your input table."),
+      fileInput("spatial_gpkg_upload","Upload 50 m section GeoPackage",accept=".gpkg")),
     div(class="cardx",h5("Variables, definitions and original units"),
       tags$p("Units below describe the original measurements and field assessments. For upload, enter case means for canopy cover, points of interest, bench count and impervious cover; enter standardized 1–5 spatial-condition scores for the other measures. Fill case and raw_spatial_value, with one row per case and measure."),
       DTOutput("spatial_input_reference"),
@@ -294,32 +330,44 @@ workflow_ui <- function() page_navbar(title="ReBioClim Synergies and Conflicts",
           tags$tr(tags$td("Geberbach"),tags$td("Riparian_Trees"),tags$td("Canopy cover within 10 m"),tags$td("0.90")),
           tags$tr(tags$td("Teplica"),tags$td("Riparian_Trees"),tags$td("Canopy cover within 10 m"),tags$td("1.00")))),
       tags$p("Here, canopy cover is a proportion from 0 to 1. The app converts these values to spatial-condition scores of 2, 4 and 5."))),
-  nav_panel("3 Public Support", intro("Public-support data for your case", "As in Step 2, use one row per case and restoration measure. For Riparian_Trees, enter the mean microclimate-importance rating on its original 1–4 scale. For other measures, enter a standardized 1–5 public-support score. Upload the completed table in Step 4."),
-    div(class="cardx",h5("From survey responses to one stream-level input"),
-      tags$p("Public-support evidence refers to the whole pilot site rather than individual 50 m sections. Group survey responses by the same stream study area used in Step 2. For rating questions, calculate the mean response for the relevant variable. Where several survey variables represent one measure, the pilot method uses their average. Choice-experiment measures use the model results for that site."),
-      tags$p("Microclimate example: three respondents give ratings of 2, 3 and 4 on the original 1–4 scale. Their mean is (2 + 3 + 4) / 3 = 3. Enter the same stream name under case, Riparian_Trees under measure and 3 under raw_public_value. The responses become one row for the stream and measure."),
-      tags$p("For Riparian_Trees, upload this mean 1–4 rating. For the other measures, prepare the stream-level 1–5 public-support score before filling the table. Match each row to the same case and measure in the spatial table, then upload both tables in Step 4.")),
+  nav_panel("3 Public Support", intro("Public-support data for your case", "Public-support data can be collected by following the project survey methodology or by using simplified questions that still show preference and support for the 17 restoration measures."),
+    div(class="cardx",h5("Collect public-support data"),
+      tags$p("Use either of the following approaches:"),
+      tags$ol(
+        tags$li("Follow the project's approach and survey methodology."),
+        tags$li("Use simplified questions that still show preference and support for the 17 restoration measures.")),
+      tags$p(tags$a(href="ReBioClim_survey_ENG.pdf",target="_blank","Download the English project survey"), "."),
+      tags$p("For collection methodology and ReBioClim preference results, see ",tags$a(href="https://www.interreg-central.eu/wp-content/uploads/2026/09/D1.2.2-ReBioClim-Report-Citizens-Preferences.pdf",target="_blank",rel="noopener","D1.2.2"),".")),
+    div(class="cardx",h5("Questionnaire sections and original scales"),
+      tags$p("The letters (a), (b), (c) and (d) identify the questionnaire section from which the public-support indicators were created:"),
+      tags$ol(type="a",
+        tags$li(tags$strong("Preferred choice elements"), " — preference score for each attribute level based on model coefficients (expert method — not recommended).",tags$br(),"Choice-experiment coefficient 0–1: least preferred to most preferred."),
+        tags$li(tags$strong("Preferred stream measures"), " — preference scores for different types of watercourse and riverside design (illustrations).",tags$br(),"Scale 1–10: least liked to most liked."),
+        tags$li(tags$strong("Preferred ecosystem services"), " — importance assigned by respondents to potential benefits of revitalization (as a proxy for site condition).",tags$br(),"Scale 1–4: completely unimportant to completely important."),
+        tags$li(tags$strong("Usage type"), " — agreement with the main reasons for visiting the pilot site (as a proxy for site facilities).",tags$br(),"Scale 0–3: strongly disagree to strongly agree.")),
+      tags$p("For further details, see ",tags$a(href="https://www.interreg-central.eu/wp-content/uploads/2026/03/D1.3.1-ReBioClim-Synergies-and-Conflicts-Report.pdf",target="_blank",rel="noopener","D1.3.1, Section 2.4"),".")),
     div(class="cardx",downloadButton("download_support_template","Download public-support table")),
     div(class="cardx",h5("Variables, definitions and original units"),
-      tags$p("Units below describe the original survey evidence. For upload, enter the mean 1–4 microclimate-importance rating for Riparian_Trees and standardized 1–5 public-support scores for the other measures. Fill raw_public_value and use the same case and measure names as in your spatial-data table."),
+      tags$p("Use one row for each case and restoration measure. Enter the stream-level public-support value on the original scale shown below; the app converts it to the five-level public-support score after upload."),
       DTOutput("public_input_reference"),
-      tags$p("(*2) Value was inverted."),
-      tags$p("Choice-experiment coefficient: derived by analyzing residents’ choices between different stream restoration designs."),
-      tags$p("The letters (a), (b), (c) and (d) identify the questionnaire section. See D1.3.1 Section 2.4 for more details.")),
-    div(class="cardx",h5("Example: filling the public-support table"),tags$p("Use the same case and measure as in the spatial-data table. The example values below are mean microclimate-importance ratings on the original 1–4 scale."),
+      tags$p("(*2) Value was inverted.")),
+    div(class="cardx",h5("Example: filling the public-support table"),tags$p("Use the same case and measure as in the spatial-data table. The values below are mean responses on the original 1–4 scale."),
       tags$table(class="table",tags$thead(tags$tr(tags$th("case"),tags$th("measure"),tags$th("public_support_indicator"),tags$th("raw_public_value"))),
         tags$tbody(
-          tags$tr(tags$td("Bila Nisa"),tags$td("Riparian_Trees"),tags$td("Importance of microclimate improvement"),tags$td("3")),
-          tags$tr(tags$td("Geberbach"),tags$td("Riparian_Trees"),tags$td("Importance of microclimate improvement"),tags$td("4")),
-          tags$tr(tags$td("Teplica"),tags$td("Riparian_Trees"),tags$td("Importance of microclimate improvement"),tags$td("4")))),
-      tags$p("The app converts these to public-support scores of 4, 5 and 5. Together with Step 2, they reproduce the three Riparian_Trees rows in the Step 4 paste example."))),
+          tags$tr(tags$td("Bila Nisa"),tags$td("Riparian_Trees"),tags$td("Improvement of microclimate (c)"),tags$td("3")),
+          tags$tr(tags$td("Geberbach"),tags$td("Riparian_Trees"),tags$td("Improvement of microclimate (c)"),tags$td("4")),
+          tags$tr(tags$td("Teplica"),tags$td("Riparian_Trees"),tags$td("Improvement of microclimate (c)"),tags$td("4")))),
+      tags$p("The app converts these to public-support scores of 4, 5 and 5. Match each row to the same case and measure in the spatial-data table, then upload both tables in Step 4."))),
   nav_panel("4 SynCon Results",intro("SynCon quadrant results", "Paste scores already standardized to 1–5, or upload your filled-out tables for the app to standardize. Click Calculate SynCon to see the final quadrant results."),
     div(class="cardx",h5("Input data"),radioButtons("syncon_mode",NULL,c("Upload your filled-out table"="upload","Paste standardized scores"="paste"),selected="upload",inline=TRUE),
       conditionalPanel("input.syncon_mode == 'upload'",layout_columns(col_widths=c(6,6),fill=FALSE,
         fileInput("spatial_upload","Spatial-data CSV",accept=".csv"),fileInput("support_upload","Public-support CSV",accept=".csv"))),
       conditionalPanel("input.syncon_mode == 'paste'",tags$p("Edit or replace the example below. Columns are case, measure, spatial_condition and public_support. Both scores must be 1–5."),textAreaInput("paste_sc_ps","Standardized input table",value=paste_example_text,rows=12)),
       actionButton("calculate_syncon","Calculate SynCon",class="btn-primary")),
-    div(class="cardx",h5("SynCon quadrant results"),selectInput("result_case","Stream / case",choices=c("All streams"="All")),plotOutput("case_plot",height=650))),
+    div(class="cardx",h5("SynCon quadrant results"),layout_columns(col_widths=c(4,8),fill=FALSE,
+      div(selectInput("result_case","Stream / case",choices=c("All streams"="All")),checkboxGroupInput("result_categories","SynCon categories",choices=names(quadrant_colors),selected=names(quadrant_colors))),
+      div(plotlyOutput("case_plot",height=650)))),
+    div(class="cardx",h5("Mapped spatial values"),tags$p("Select a spatial indicator to inspect the 50 m section values for the calculated case."),uiOutput("result_map_controls"),leafletOutput("result_map",height=650))),
   nav_panel("Help", help_box))
 
 workflow_server <- function(input, output, session) {
@@ -328,6 +376,40 @@ workflow_server <- function(input, output, session) {
       formatStyle(names(classification_table),valueColumns="Conflict or synergy for restoration",target="cell",
         backgroundColor=styleEqual(names(quadrant_colors),unname(quadrant_colors)),
         color=styleEqual(names(quadrant_colors),c("white","white","black","black"))),server=FALSE)
+  uploaded_sections <- reactive({
+    req(input$spatial_gpkg_upload)
+    g <- tryCatch(st_read(input$spatial_gpkg_upload$datapath,quiet=TRUE),error=function(e) NULL)
+    validate(need(!is.null(g),"The GeoPackage could not be read."),need(inherits(g,"sf"),"The GeoPackage needs a spatial layer."))
+    case_column <- if("case" %in% names(g)) "case" else if("stream_name" %in% names(g)) "stream_name" else NA_character_
+    validate(need(!is.na(case_column),"The GeoPackage needs a case or stream_name column."),need("section_id" %in% names(g),"The GeoPackage needs a section_id column."))
+    g <- st_transform(g,4326)
+    attr(g,"case_column") <- case_column
+    g
+  })
+  output$result_map_controls <- renderUI({
+    if(is.null(input$spatial_gpkg_upload)) return(tags$p("Upload a 50 m section GeoPackage in Step 2 to visualize mapped values."))
+    req(uploaded_sections())
+    g <- uploaded_sections(); case_column <- attr(g,"case_column")
+    indicators <- setdiff(names(g),c("section_id",case_column,attr(g,"sf_column")))
+    indicators <- indicators[vapply(g[indicators],function(x) is.numeric(x)||is.character(x)||is.factor(x),logical(1))]
+    validate(need(length(indicators)>0,"The GeoPackage has no spatial-indicator columns to map."))
+    selectInput("result_map_indicator","Spatial indicator",choices=setNames(indicators,indicators))
+  })
+  output$result_map <- renderLeaflet({
+    if(input$calculate_syncon < 1 || is.null(input$spatial_gpkg_upload)) {
+      return(leaflet() |> addControl("Calculate SynCon and upload a GeoPackage in Step 2 to visualize section values.",position="topleft"))
+    }
+    g <- uploaded_sections(); indicator <- input$result_map_indicator; req(indicator)
+    case_column <- attr(g,"case_column")
+    if(!is.null(input$result_case) && input$result_case!="All") g <- g[as.character(g[[case_column]])==input$result_case,]
+    validate(need(nrow(g)>0,"No GeoPackage sections match the selected case."))
+    values <- g[[indicator]]; is_numeric <- is.numeric(values)
+    pal <- if(is_numeric) colorBin(colorRampPalette(c("#fff3b0","#ff8d28","#c8241d"))(5),domain=values,bins=5,na.color="#d9d9d9") else colorFactor(colorRampPalette(c("#fff3b0","#ff8d28","#c8241d"))(max(3,length(unique(values)))),domain=values,na.color="#d9d9d9")
+    section <- as.character(g$section_id)
+    labels <- paste0("<strong>Section ",htmltools::htmlEscape(section),"</strong><br>",htmltools::htmlEscape(indicator),": ",htmltools::htmlEscape(ifelse(is.na(values),"No data",as.character(values))))
+    leaflet(g) |> addProviderTiles(providers[[input$basemap]]) |> addPolylines(color=pal(values),weight=8,opacity=1,label=htmltools::HTML(labels)) |>
+      addLegend(position="bottomright",pal=pal,values=values,title=indicator,opacity=1)
+  })
   pilot_plot_data <- reactive({
     req(input$example_stream)
     x <- scores |> filter(pilot_stream==input$example_stream,class %in% input$example_categories)
@@ -343,10 +425,10 @@ workflow_server <- function(input, output, session) {
   output$process_plot <- renderPlotly({
     x <- as.data.frame(pilot_plot_data())
     labels <- list(
-      list(x=1.15,y=3.6,text="High Restoration<br>Opportunity",showarrow=FALSE,xanchor="left",font=list(color="#000000")),
-      list(x=3.75,y=3.6,text="Recognized Asset",showarrow=FALSE,xanchor="left",font=list(color="#000000")),
-      list(x=1.15,y=1.5,text="Information /<br>Restoration Gap",showarrow=FALSE,xanchor="left",font=list(color="#000000")),
-      list(x=3.75,y=1.5,text="Perception Gap",showarrow=FALSE,xanchor="left",font=list(color="#000000")))
+      list(x=1.15,y=3.6,text="High Restoration<br>Opportunity",showarrow=FALSE,xanchor="left",font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111")),
+      list(x=3.75,y=3.6,text="Recognized Asset",showarrow=FALSE,xanchor="left",font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111")),
+      list(x=1.15,y=1.5,text="Information /<br>Restoration Gap",showarrow=FALSE,xanchor="left",font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111")),
+      list(x=3.75,y=1.5,text="Perception Gap",showarrow=FALSE,xanchor="left",font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111")))
     p <- plot_ly()
     for(category in names(quadrant_colors)) {
       z <- x[x$class==category,]
@@ -366,7 +448,7 @@ workflow_server <- function(input, output, session) {
         list(type="line",x0=3.5,x1=3.5,y0=.5,y1=5.5,line=list(color="#999999",dash="dash")),
         list(type="line",x0=.5,x1=5.5,y0=2.5,y1=2.5,line=list(color="#999999",dash="dash"))),
       annotations=labels,
-      legend=list(orientation="h",x=0,y=-.18,font=list(size=10),itemwidth=30),margin=list(b=100),plot_bgcolor="#ffffff",paper_bgcolor="#ffffff")
+      font=list(family="TASA Orbiter, Arial, sans-serif",color="#111111"),legend=list(orientation="h",x=0,y=-.18,font=list(size=10),itemwidth=30),margin=list(b=100),plot_bgcolor="#ffffff",paper_bgcolor="#ffffff")
     config(p,displayModeBar=FALSE,scrollZoom=FALSE,doubleClick=FALSE)
   })
   mapping_data <- reactive({
@@ -433,8 +515,8 @@ workflow_server <- function(input, output, session) {
     validate(need(all(c("case","measure","raw_public_value") %in% names(x)),"Public-support CSV needs case, measure and raw_public_value."))
     x <- tibble(case=trimws(as.character(x$case)),measure=trimws(as.character(x$measure)),raw_public_value=trimws(as.character(x$raw_public_value)),public_scale=if("public_scale" %in% names(x)) trimws(as.character(x$public_scale)) else NA_character_)
     x <- x |> filter(!is.na(raw_public_value)&nzchar(raw_public_value)) |>
-      mutate(raw_public_value=suppressWarnings(as.numeric(raw_public_value)),public_scale=ifelse(is.na(public_scale)|!nzchar(public_scale),ifelse(normalize_case_measure(measure)=="Riparian_Trees","benefit_1_4","prepared_1_5"),public_scale))
-    validate(need(nrow(x)>0,"Fill at least one public-support value in the downloaded table."),need(all(!is.na(x$case)&nzchar(x$case)&!is.na(x$measure)&nzchar(x$measure)),"Every filled public-support row needs a case and measure."),need(all(is.finite(x$raw_public_value)),"Every public-support row needs a numeric value."),need(all(x$public_scale %in% c("benefit_1_4","rating_1_10","use_0_3","prepared_1_5")),"An optional legacy scale is not recognized."))
+      mutate(raw_public_value=suppressWarnings(as.numeric(raw_public_value)),public_scale=ifelse(is.na(public_scale)|!nzchar(public_scale),public_scale_for_measure(measure),public_scale))
+    validate(need(nrow(x)>0,"Fill at least one public-support value in the downloaded table."),need(all(!is.na(x$case)&nzchar(x$case)&!is.na(x$measure)&nzchar(x$measure)),"Every filled public-support row needs a case and measure."),need(all(is.finite(x$raw_public_value)),"Every public-support row needs a numeric value."),need(all(x$public_scale %in% c("coefficient_0_1","benefit_1_4","rating_1_10","use_0_3","prepared_1_5")),"A public-support value could not be matched to its original scale."))
     validate(need(!anyDuplicated(paste(x$case,normalize_case_measure(x$measure),sep="\r")),"Use only one public-support row per case and restoration measure."))
     x
   })
@@ -471,11 +553,11 @@ workflow_server <- function(input, output, session) {
     if(!is.null(input$result_case) && input$result_case!="All") x <- x |> filter(`Study area`==input$result_case)
     x
   })
-  output$case_plot <- renderPlot({
+  output$case_plot <- renderPlotly({
     validate(need(isTRUE(input$calculate_syncon > 0),"Enter data and click Calculate SynCon."))
-    x <- case_result_data() |> filter(!is.na(`Spatial condition`),!is.na(`Public support`)) |> transmute(abbr=Abbreviation,sc=`Spatial condition`,ps=`Public support`,pilot_stream=ifelse(`Study area` %in% names(stream_shapes),`Study area`,"Case")) |> add_quadrant_fields()
-    validate(need(nrow(x)>0,"No complete quadrant result is available for this stream or case.")); plot_quadrants(x,"abbr") + guides(shape="none")
-  },res=144)
+    x <- case_result_data() |> filter(!is.na(`Spatial condition`),!is.na(`Public support`)) |> transmute(measure=`Restoration measure`,abbr=Abbreviation,sc=`Spatial condition`,ps=`Public support`) |> add_quadrant_fields() |> filter(class %in% input$result_categories)
+    validate(need(nrow(x)>0,"No complete quadrant result is available for this stream or case.")); plotly_quadrants(x)
+  })
 }
 
 ui <- workflow_ui()
@@ -488,7 +570,7 @@ server <- function(input, output, session) {
     vals <- if(cc %in% names(g)) g[[cc]] else g[[v]]
     levels <- if(cc %in% names(g)) score_levels else map_category_levels[[v]]
     req(length(levels)>0)
-    pal <- colorFactor(colorRampPalette(c("#66d7d1","#2f41dd"))(length(levels)), levels=levels, ordered=TRUE)
+    pal <- colorFactor(colorRampPalette(c("#fff3b0","#ff8d28","#c8241d"))(length(levels)), levels=levels, ordered=TRUE)
     unit <- unname(units[v]); if(is.na(unit)) unit <- "original category"
     raw_values <- ifelse(is.na(g[[v]]),"No data",as.character(g[[v]]))
     labels <- paste("Section",g$section_id,"|",variable_labels[[v]],"|",raw_values,unit)
@@ -496,7 +578,7 @@ server <- function(input, output, session) {
     legend_levels <- rev(levels)
     legend_rows <- paste0("<div class='map-legend-row'><i style='background:",pal(legend_levels),"'></i><span>",htmltools::htmlEscape(legend_levels),"</span></div>",collapse="")
     legend_html <- paste0("<div class='map-legend-title'>",htmltools::htmlEscape(variable_labels[[v]]),"</div>",legend_rows)
-    leaflet(g) |> addProviderTiles(providers[[input$basemap]]) |> addPolylines(color=~pal(vals), weight=7, opacity=.9, label=labels,popup=popups) |> addControl(htmltools::HTML(legend_html),position="bottomright",className="map-legend")
+    leaflet(g) |> addProviderTiles(providers[[input$basemap]]) |> addPolylines(color=~pal(vals), weight=8, opacity=1, label=labels,popup=popups) |> addControl(htmltools::HTML(legend_html),position="bottomright",className="map-legend")
   })
 }
 shinyApp(ui, server)
