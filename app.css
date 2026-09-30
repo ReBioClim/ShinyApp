@@ -1,69 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=TASA+Orbiter:wght@400;500;600;700&display=swap');
+
 :root {
-  --paper:#ffffff; --electric:#2f41dd; --arctic:#66d7d1; --royal:#f3cfc6;
-  --orange:#ff600e; --gold:#e9ce2c; --ink:#000000;
+  --paper:#eef6e8; --surface:#ffffff; --ink:#111111; --line:#151515;
+  --green-pale:#e4f0db; --green:#9fc68a; --green-deep:#6f9d60;
+  --purple:#c6b9ed; --blue:#b9dcef;
 }
 
-body { font-family:Arial,Helvetica,sans-serif; background:var(--paper); color:var(--ink); }
-.container-fluid { max-width:1500px; }
+body { font-family:"Libre Baskerville",Georgia,serif; background:var(--paper); color:var(--ink); font-size:15px; line-height:1.55; }
+.container-fluid { max-width:1240px; }
 
-/* Navigation */
-.navbar { background:var(--paper)!important; padding:16px 22px; border:0; }
-.navbar .navbar-brand { font-size:24px; font-weight:900; color:var(--electric)!important; }
-.navbar .nav-link { font-size:14px; background:var(--arctic); border-radius:0; margin:4px; padding:8px 14px!important; font-weight:700; color:var(--ink)!important; }
-.navbar .nav-link:hover { background:var(--royal); }
-.navbar .nav-link.active,.btn-primary { background:var(--electric)!important; color:white!important; }
+.navbar { background:var(--surface)!important; padding:10px 18px; border-bottom:1px solid var(--line); }
+.navbar .navbar-brand { font-family:"TASA Orbiter",Arial,sans-serif; font-size:23px; font-weight:700; color:var(--ink)!important; letter-spacing:-.04em; }
+.navbar .nav-link { font-family:"TASA Orbiter",Arial,sans-serif; font-size:12px; background:transparent; border-radius:0; margin:0; padding:7px 8px!important; font-weight:500; color:var(--ink)!important; }
+.navbar .nav-link:hover,.navbar .nav-link.active { background:var(--green-pale); color:var(--ink)!important; }
 
-/* Content */
-.step-note { background:#ffffff; padding:18px 24px; margin:14px 0; border-left:5px solid var(--electric); }
-.step-note p { max-width:1100px; }
-.step-note h3 { font-size:28px; color:var(--electric); }
-.cardx { overflow:auto; background:#ffffff; border:1px solid #66d7d1; border-top:4px solid var(--arctic); border-radius:0; padding:28px; margin-bottom:22px; }
-h4 { font-size:32px; line-height:1.15; font-weight:900; margin-bottom:24px; }
-h5 { font-weight:bold; margin-top:16px; }
-label,.btn { font-weight:700; }
-summary { font-weight:bold; cursor:pointer; color:var(--electric); }
-a { color:var(--electric); }
+.home-logo { display:flex; justify-content:center; margin:26px auto 0; background:transparent!important; }
+.home-logo img { display:block; width:min(100%,360px); height:auto; }
+.step-note { background:var(--green-pale); padding:34px 38px; margin:26px 0; border:0; }
+.step-note p { max-width:850px; margin-bottom:0; }
+.step-note h3,h4,h5,label,.btn,summary { font-family:"TASA Orbiter",Arial,sans-serif; }
+.step-note h3 { font-size:38px; line-height:1.03; font-weight:700; letter-spacing:-.045em; color:var(--ink); }
+.cardx { overflow:auto; background:var(--surface); border:1px solid var(--line); border-top:1px solid var(--line); border-radius:0; padding:26px; margin-bottom:20px; }
+h4 { font-size:31px; line-height:1.06; font-weight:700; letter-spacing:-.04em; margin-bottom:20px; }
+h5 { font-size:17px; font-weight:700; letter-spacing:-.02em; margin-top:10px; }
+label,.btn { font-weight:600; }
+summary { font-weight:700; cursor:pointer; color:var(--ink); }
+a { color:var(--ink); text-decoration-thickness:1px; text-underline-offset:3px; }
 
-/* Inputs and buttons */
 .btn,.form-control,.form-select,textarea { border-radius:0!important; }
-.form-control,.form-select,textarea { border:1px solid #66d7d1!important; background:#ffffff!important; color:var(--ink); }
-.btn-primary { border-color:var(--electric)!important; }
-.btn-outline-secondary { border-color:var(--electric); color:var(--electric); }
-.btn-outline-secondary:hover { background:var(--royal); color:var(--ink); }
-.form-control:focus,.form-select:focus,textarea:focus { border-color:var(--electric)!important; box-shadow:0 0 0 3px #f3cfc6!important; }
-:focus-visible { outline:3px solid var(--electric); outline-offset:2px; }
-input[type=radio] { accent-color:var(--electric); }
+.form-control,.form-select,textarea { border:1px solid var(--line)!important; background:var(--surface)!important; color:var(--ink); font-family:"TASA Orbiter",Arial,sans-serif; }
+.btn-primary { background:var(--purple)!important; border-color:var(--line)!important; color:var(--ink)!important; }
+.btn-outline-secondary { border-color:var(--line); color:var(--ink); }
+.btn-outline-secondary:hover { background:var(--purple); color:var(--ink); }
+.form-control:focus,.form-select:focus,textarea:focus { border-color:var(--line)!important; box-shadow:0 0 0 3px var(--blue)!important; }
+:focus-visible { outline:2px solid var(--line); outline-offset:2px; }
+input[type=radio] { accent-color:#8f81c8; }
 
-/* Data tables */
-.dataTables_wrapper,.dataTables_length,.dataTables_filter,.dataTables_info,.dataTables_paginate { background:transparent!important; color:var(--ink)!important; }
-.dataTables_length select,.dataTables_filter input { background:#ffffff!important; border:1px solid #66d7d1!important; border-radius:0!important; padding:6px 12px!important; }
-table.dataTable { border-collapse:separate!important; border-spacing:0 5px!important; background:transparent!important; }
-table.dataTable th { background:var(--electric)!important; color:white!important; border:0!important; font-size:14px!important; }
-.classification-table table.dataTable th { background:#e5e5e5!important; color:#000000!important; }
-table.dataTable td { border:0!important; font-size:14px!important; padding:12px 14px!important; white-space:pre-line; }
-table.dataTable tbody tr,table.dataTable tbody tr:nth-child(even) { background:#ffffff!important; }
-table.dataTable tbody tr.selected > td { background:var(--royal)!important; color:var(--ink)!important; box-shadow:none!important; }
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-  background:var(--arctic)!important; background-image:none!important; box-shadow:none!important;
-  color:var(--ink)!important; border:0!important; border-radius:0!important; margin:0 4px!important;
-}
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover { background:var(--royal)!important; background-image:none!important; color:var(--ink)!important; }
-.dataTables_wrapper .dataTables_paginate .paginate_button.current,
-.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-  background:var(--electric)!important; background-image:none!important; color:white!important;
-}
+.dataTables_wrapper,.dataTables_length,.dataTables_filter,.dataTables_info,.dataTables_paginate { background:transparent!important; color:var(--ink)!important; font-family:"TASA Orbiter",Arial,sans-serif; }
+.dataTables_length select,.dataTables_filter input { background:var(--surface)!important; border:1px solid var(--line)!important; border-radius:0!important; padding:6px 10px!important; }
+table.dataTable { border-collapse:collapse!important; border-spacing:0!important; background:transparent!important; }
+table.dataTable th { background:var(--blue)!important; color:var(--ink)!important; border:1px solid var(--line)!important; font-family:"TASA Orbiter",Arial,sans-serif; font-size:13px!important; }
+.classification-table table.dataTable th { background:#e5e5e5!important; color:var(--ink)!important; }
+table.dataTable td { border:1px solid var(--line)!important; font-size:13px!important; padding:10px 12px!important; white-space:pre-line; }
+table.dataTable tbody tr,table.dataTable tbody tr:nth-child(even) { background:var(--surface)!important; }
+table.dataTable tbody tr.selected > td { background:var(--purple)!important; color:var(--ink)!important; box-shadow:none!important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button { background:var(--blue)!important; background-image:none!important; box-shadow:none!important; color:var(--ink)!important; border:1px solid var(--line)!important; border-radius:0!important; margin:0 2px!important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover { background:var(--purple)!important; background-image:none!important; color:var(--ink)!important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background:var(--purple)!important; background-image:none!important; color:var(--ink)!important; }
 .measure-overview table.dataTable tbody tr { cursor:zoom-in; }
 
-/* Workflow, cards and map */
 details[open] > summary { margin-bottom:16px; }
-.workflow-steps li::marker { color:var(--electric); font-weight:bold; }
+.workflow-steps li::marker { color:var(--green-deep); font-family:"TASA Orbiter",Arial,sans-serif; font-weight:700; }
 .toolkit-card-zoom { height:calc(100vh - 210px); height:calc(100dvh - 210px); display:flex; align-items:center; justify-content:center; overflow:hidden; }
 .toolkit-card-zoom img { display:block; width:100%; height:100%; object-fit:contain; }
-.leaflet-container { border-radius:0; }
-.leaflet-control { color:#000000; }
-.leaflet-control-layers,.leaflet-control .legend { background:#ffffff; }
-.leaflet-control.map-legend { background:#ffffff; color:#000000; padding:10px 12px; margin:0; box-shadow:0 1px 5px rgba(0,0,0,.2); border-radius:0; }
-.map-legend-title { font-weight:700; margin-bottom:6px; }
+.leaflet-container { border-radius:0; border:1px solid var(--line); }
+.leaflet-control { color:var(--ink); font-family:"TASA Orbiter",Arial,sans-serif; }
+.leaflet-control-layers,.leaflet-control .legend { background:var(--surface); }
+.leaflet-control.map-legend { background:var(--surface); color:var(--ink); padding:10px 12px; margin:0; box-shadow:none; border:1px solid var(--line); border-radius:0; }
+.map-legend-title { font-family:"TASA Orbiter",Arial,sans-serif; font-weight:700; margin-bottom:6px; }
 .map-legend-row { display:flex; align-items:center; gap:8px; line-height:1.5; }
 .map-legend-row i { display:block; width:22px; height:18px; flex:0 0 22px; }
-.raw-map-ramp { height:95px; width:22px; margin:5px 0; background:linear-gradient(to bottom,#2f41dd,#66d7d1); }
+.raw-map-ramp { height:95px; width:22px; margin:5px 0; background:linear-gradient(to bottom,#c8241d,#ff8d28,#fff3b0); }
+
+@media (max-width:768px) {
+  .step-note { padding:26px 22px; }
+  .step-note h3 { font-size:31px; }
+  .cardx { padding:20px; }
+}

@@ -1,0 +1,18 @@
+case;measure;public_support_indicator;raw_public_value;variable_name;unit;definition
+;Increase_Space;Meanders with elements (a);;Meanders with elements (a);Choice-experiment coefficient;Mean preference for stream meanders with elements
+;Accessibility_Along_Stream;"Get from ""A to B"" (d)";;"Get from ""A to B"" (d)";0-3;Agreement that the site is used mainly for passing through
+;Riparian_Trees;Improvement of microclimate (c) ;;Improvement of microclimate (c);1-4;Importance of a cooler, more pleasant local climate as a benefit of restoration (as proxy for the added value of trees)
+;Green_Corridor;Habitats for plants and animals (c);;Habitats for plants and animals (c);1-4;Importance of the site supporting wildlife and plant life (as a proxy for natural design)
+;Remove_TechRiverbed;Meanders with/-out elements (a);;Meanders with/-out elements (a);Choice-experiment coefficient;Mean preference for stream meanders 
+;Remove_Concrete_Channel;Concrete stream (b) (*2);;Concrete stream (b) (*2);1-10;Average preference for a straightened, concrete-lined stream design (inverted)
+;Riparian_Buffer;Wide riparian vegetation (b);;Wide riparian vegetation (b);1-10;Average preference for streams with a wide strip of riverside vegetation
+;Remove_BiologicalBarriers;Fish passage (b);;Fish passage (b);1-10;Average preference for stream designs that allow fish to pass through
+;Instream_Structures;Isles, water terraces, stones, dead wood in the stream (b);;Isles, water terraces, stones, dead wood in the stream (b);1-10;Average preference for islands + terraces + stones + dead wood in the stream
+;Access_Stream;Access to water - stairs and pier (a);;Access to water - stairs and pier (a);Choice-experiment coefficient;Mean preference for access features such as stairs and a pier
+;Reconnect_Floodplains;Pools and wetlands in floodplains (b);;Pools and wetlands in floodplains (b);1-10;Average preference for pools and wetlands in the floodplain
+;Green_Network;Wide riparian vegetation and natural arrangement of greenery in the wider area (a);;Wide riparian vegetation and natural arrangement of greenery in the wider area (a);Choice-experiment coefficient;Mean preference for wide riverside vegetation combined with natural park further from the stream
+;Nature_Observation;Observing nature (d);;Observing nature (d);0-3;Agreement that the site is used mainly for observing nature
+;Groynes_Baffles_DeadWood;Dead wood (b);;Dead wood (b);1-10;Average preference for streams that include dead wood
+;Service_Buffer;Arrangement of greenery in the wider area and riparian vegetation (a);;Arrangement of greenery in the wider area and riparian vegetation (a);Choice-experiment coefficient;Mean preference for how greenery is arranged both near and further from the stream
+;Integrate_Programmes;Education, inspiration, casual contacts and recreational opportunities (c);;Education, inspiration, casual contacts and recreational opportunities (c);1-4;Importance of social + recreational + educational benefits of the restored site
+;Unseal_Surfaces;Urban park (a) as proxy for impervious surface (*2);;Urban park (a) as proxy for impervious surface (*2);Choice-experiment coefficient;"Mean preference for urban park near the site (as proxy for impervious surface; inverted)"
